@@ -47,8 +47,6 @@ class GameScene: SKScene
     //set the player's sprite to be the spaceship png ("player" in assets)
     let player = SKSpriteNode(imageNamed: "player")
     
-    //invisible sprite node at touch location
-    let invisControllerSprite = SKSpriteNode()
     
     override func didMove(to view: SKView)
     {
@@ -60,21 +58,6 @@ class GameScene: SKScene
         
         //add the spaceship to the scene
         self.addChild(player)
-//        
-//        //sprite used for rotating the player
-//        self.addChild(invisControllerSprite)
-//        
-//        //constraint for orientation behavior
-//        let rangeForOrientation = SKRange(lowerLimit: CGFloat(M_2_PI*7), upperLimit: CGFloat(M_2_PI*7))
-//        
-//        let orientConstraint = SKConstraint.orient(to: invisControllerSprite, offset: rangeForOrientation)
-//        
-//        let rangeToSprite = SKRange(lowerLimit: 100.0, upperLimit: 150.0)
-//        
-//        let distanceConstraint = SKConstraint.distance(rangeToSprite, to: player)
-//        
-//        invisControllerSprite.constraints = [orientConstraint, distanceConstraint]
-//        
         
         //calling the method to actually create the meteors (spawning them forever)
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addSmallMeteor), SKAction.wait(forDuration: 2.0)])))
@@ -143,6 +126,7 @@ class GameScene: SKScene
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
+        //rotating spaceship
         for touch in touches{
             let location = touch.location(in: self)
             let dx = CGFloat(location.x - player.position.x)
@@ -152,8 +136,7 @@ class GameScene: SKScene
             let direction = SKAction.rotate(toAngle: angle, duration: 0.1, shortestUnitArc: true)
             
             player.run(direction)
-            
-            }
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
@@ -179,7 +162,7 @@ class GameScene: SKScene
         }
         
         //add the laser to the scene
-        addChild(laser)
+        self.addChild(laser)
         
         //direction of where to shoot
         let direction = offset.normalized()
@@ -194,5 +177,15 @@ class GameScene: SKScene
         let actionMove = SKAction.move(to: realDest, duration: 0.8)
         let actionMoveDone = SKAction.removeFromParent()
         laser.run(SKAction.sequence([actionMove, actionMoveDone]))
+        
+        //rotating laser
+        let location = touch.location(in: self)
+        let dx = CGFloat(location.x - player.position.x)
+        let dy = CGFloat(location.y - player.position.y)
+        
+        let angle = atan2(dy,dx) - CGFloat(M_PI_2)
+        let laserdirection = SKAction.rotate(toAngle: angle, duration: 0.1, shortestUnitArc: true)
+        
+        laser.run(laserdirection) //action
     }
 }
