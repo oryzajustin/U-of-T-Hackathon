@@ -2,109 +2,197 @@
 //  GameScene.swift
 //  uofthacks
 //
-//  Created by Michelle Chen on 2017-01-21.
-//  Copyright © 2017 Michelle Chen. All rights reserved.
+//  Created by Justin Koh, Michelle Chen
 //
 
 import SpriteKit
 import GameplayKit
+import SceneKit
 
-class GameScene: SKScene {
-    
-    var entities = [GKEntity]()
-    var graphs = [String : GKGraph]()
-    
-    private var lastUpdateTime : TimeInterval = 0
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
-    
-    override func sceneDidLoad() {
+//functions to assist with vector calculations
+func + (left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x + right.x, y: left.y + right.y)
+}
 
-        self.lastUpdateTime = 0
+func - (left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x - right.x, y: left.y - right.y)
+}
+
+func * (point: CGPoint, scalar: CGFloat) -> CGPoint {
+    return CGPoint(x: point.x * scalar, y: point.y * scalar)
+}
+
+func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
+    return CGPoint(x: point.x / scalar, y: point.y / scalar)
+}
+
+#if !(arch(x86_64) || arch(arm64))
+    func sqrt(a: CGFloat) -> CGFloat {
+        return CGFloat(sqrtf(Float(a)))
+    }
+#endif
+
+extension CGPoint {
+    func length() -> CGFloat {
+        return sqrt(x*x + y*y)
+    }
+    
+    func normalized() -> CGPoint {
+        return self / length()
+    }
+}
+
+class GameScene: SKScene
+{
+    //set the player's sprite to be the spaceship png ("player" in assets)
+    let player = SKSpriteNode(imageNamed: "player")
+    
+    //invisible sprite node at touch location
+    let invisControllerSprite = SKSpriteNode()
+    
+    override func didMove(to view: SKView)
+    {
+        //set background to black
+        backgroundColor = SKColor.black
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
+        //set the player's position to the middle of the screen and at the bottom
+        player.position = CGPoint(x: size.width * 0.5, y: size.height * 0.1)
         
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        //add the spaceship to the scene
+        self.addChild(player)
+//        
+//        //sprite used for rotating the player
+//        self.addChild(invisControllerSprite)
+//        
+//        //constraint for orientation behavior
+//        let rangeForOrientation = SKRange(lowerLimit: CGFloat(M_2_PI*7), upperLimit: CGFloat(M_2_PI*7))
+//        
+//        let orientConstraint = SKConstraint.orient(to: invisControllerSprite, offset: rangeForOrientation)
+//        
+//        let rangeToSprite = SKRange(lowerLimit: 100.0, upperLimit: 150.0)
+//        
+//        let distanceConstraint = SKConstraint.distance(rangeToSprite, to: player)
+//        
+//        invisControllerSprite.constraints = [orientConstraint, distanceConstraint]
+//        
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(M_PI), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+        //calling the method to actually create the meteors (spawning them forever)
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addSmallMeteor), SKAction.wait(forDuration: 2.0)])))
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addMediumMeteor), SKAction.wait(forDuration: 6.0)])))
     }
     
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
+    //generating random numbers
+    func random() -> CGFloat
+    {
+        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
     
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
+    func random(min: CGFloat, max: CGFloat) -> CGFloat
+    {
+        return random() * (max - min) + min
     }
     
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
+    //function to create small sized meteors
+    func addSmallMeteor()
+    {
+        //set the sprite to be the mediumMeteor png (image name is different than the variable name)
+        let smallMeteor = SKSpriteNode(imageNamed: "mediumMeteor")
+        
+        //calculate where on the screen the meteor will spawn
+        let actualX = random(min: smallMeteor.size.width/2, max: size.width - smallMeteor.size.width/2)
+        
+        //spawn the meteor off screen and at the top
+        smallMeteor.position = CGPoint(x: actualX, y: size.height + smallMeteor.size.height/2)
+        
+        //add the meteor to the scene
+        addChild(smallMeteor)
+        
+        //set varying speeds of the meteors
+        let actualDuration = random (min: CGFloat(3.0), max: CGFloat(5.0))
+        
+        //actions
+        let actionMove = SKAction.move(to: CGPoint(x: actualX, y: -smallMeteor.size.width/2), duration: TimeInterval(actualDuration))
+        let actionMoveDone = SKAction.removeFromParent()
+        smallMeteor.run(SKAction.sequence([actionMove, actionMoveDone]))
     }
+    
+    //function to create medium sized meteors
+    func addMediumMeteor()
+    {
+        //set the sprite to be the largeMeteor png
+        let mediumMeteor = SKSpriteNode(imageNamed: "largeMeteor")
+        
+        //calculate where on the screen the meteor will spawn
+        let actualX2 = random(min: mediumMeteor.size.width/2, max: size.width - mediumMeteor.size.width/2)
+        
+        //spawn the meteor off screen and at the top
+        mediumMeteor.position = CGPoint(x: actualX2, y: size.height + mediumMeteor.size.height/2)
+        
+        //add meteor to the scene
+        addChild(mediumMeteor)
+        
+        //set the varying speeds of the meteors
+        let actualDuration2 = random (min: CGFloat(3.0), max: CGFloat(5.0))
+
+        //actions
+        let actionMove2 = SKAction.move(to: CGPoint(x: actualX2, y: -mediumMeteor.size.width/2), duration: TimeInterval(actualDuration2))
+        let actionMoveDone2 = SKAction.removeFromParent()
+        mediumMeteor.run(SKAction.sequence([actionMove2, actionMoveDone2]))
+    }
+    
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
+        
+        for touch in touches{
+            let location = touch.location(in: self)
+            let dx = CGFloat(location.x - player.position.x)
+            let dy = CGFloat(location.y - player.position.y)
+            
+            let angle = atan2(dy,dx) - CGFloat(M_PI_2)
+            let direction = SKAction.rotate(toAngle: angle, duration: 0.1, shortestUnitArc: true)
+            
+            player.run(direction)
+            
+            }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
+    {
+        //activated by touch
+        guard let touch = touches.first else
+        {
+            return
+        }
+        let touchLocation = touch.location(in: self)
+        
+        //make a laser sprite shoot out from where the player is positioned
+        let laser = SKSpriteNode(imageNamed: "laser")
+        laser.position = player.position
+        
+        //calculates the vector from the player to the position that was touched
+        let offset = touchLocation - laser.position
+        
+        //do not do anything if the player tries to shoot backwards
+        if(offset.y < 0)
+        {
+            return
         }
         
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        //add the laser to the scene
+        addChild(laser)
         
-        // Initialize _lastUpdateTime if it has not already been
-        if (self.lastUpdateTime == 0) {
-            self.lastUpdateTime = currentTime
-        }
+        //direction of where to shoot
+        let direction = offset.normalized()
         
-        // Calculate time since last update
-        let dt = currentTime - self.lastUpdateTime
+        //guarantees that the laser will fly off the screen
+        let shotDistance = direction * 1000
         
-        // Update entities
-        for entity in self.entities {
-            entity.update(deltaTime: dt)
-        }
+        //add the distance to the player's position (destination of the laser)
+        let realDest = shotDistance + laser.position
         
-        self.lastUpdateTime = currentTime
+        //actions
+        let actionMove = SKAction.move(to: realDest, duration: 0.8)
+        let actionMoveDone = SKAction.removeFromParent()
+        laser.run(SKAction.sequence([actionMove, actionMoveDone]))
     }
 }

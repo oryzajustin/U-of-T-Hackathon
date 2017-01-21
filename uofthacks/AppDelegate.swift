@@ -2,8 +2,7 @@
 //  AppDelegate.swift
 //  uofthacks
 //
-//  Created by Michelle Chen on 2017-01-21.
-//  Copyright © 2017 Michelle Chen. All rights reserved.
+//  Created by Justin Koh, Michelle Chen
 //
 
 import UIKit
