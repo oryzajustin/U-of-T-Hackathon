@@ -1,6 +1,11 @@
 # U-of-T-Hackathon
 Hack developed during the 2017 season U of T Hackathon
 
+##Description
+This hackathon project uses swift and Xcode to create an iPhone game, where the player is a stationary spaceship centered at the bottom 
+of the screen and shoots lasers at incoming asteroids. However, to shoot the lasers, the player must blow into their
+microphone, and use their finger to aim the lasers.
+
 #todo
 - [X] Created player sprite
 - [X] Spawned meteors of varying sizes and speeds, infinitely
