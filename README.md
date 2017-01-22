@@ -7,11 +7,11 @@ Hack developed during the 2017 season U of T Hackathon
 - [X] Rotated spaceship
 - [X] Make laser point in direction of finger
 - [X] Put hitboxes on laser, meteor and player
-- [ ] If 3(?) meteors hit the player/go past the bottom of the screen --> Game Over
+- [X] If a meteor goes past the bottom of the screen --> Game Over
 - [ ] Replace touch (for activating the shooting), with audio detection
-- [ ] Create a highscore
+- [X] Track the player's score
 - [ ] Create home screen
-- [ ] Create game over screen
+- [X] Create game over screen
 - [ ] Add sound effects
 - [ ] Add stars
 - [ ] Design logo
