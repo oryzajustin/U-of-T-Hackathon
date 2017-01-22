@@ -32,6 +32,14 @@ func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
     }
 #endif
 
+//set up physics constants
+struct PhysicsCategory {
+    static let None      : UInt32 = 0
+    static let All       : UInt32 = UInt32.max
+    static let Meteor   : UInt32 = 0b1
+    static let Laser    : UInt32 = 0b10
+}
+
 extension CGPoint {
     func length() -> CGFloat {
         return sqrt(x*x + y*y)
@@ -42,7 +50,7 @@ extension CGPoint {
     }
 }
 
-class GameScene: SKScene
+class GameScene: SKScene, SKPhysicsContactDelegate
 {
     //set the player's sprite to be the spaceship png ("player" in assets)
     let player = SKSpriteNode(imageNamed: "player")
@@ -58,6 +66,10 @@ class GameScene: SKScene
         
         //add the spaceship to the scene
         self.addChild(player)
+        
+        //sets up game to have no gravity, and notifies when collision occurs
+        physicsWorld.gravity = CGVector.zero
+        physicsWorld.contactDelegate = self
         
         //calling the method to actually create the meteors (spawning them forever)
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addSmallMeteor), SKAction.wait(forDuration: 2.0)])))
@@ -80,6 +92,21 @@ class GameScene: SKScene
     {
         //set the sprite to be the mediumMeteor png (image name is different than the variable name)
         let smallMeteor = SKSpriteNode(imageNamed: "mediumMeteor")
+        
+        //creates physics body for sprite
+        smallMeteor.physicsBody = SKPhysicsBody(rectangleOf: smallMeteor.size)
+        
+        //sets sprite to be dynamic
+        smallMeteor.physicsBody?.isDynamic = true
+        
+        //sets category bit mask to be meteorCategory
+        smallMeteor.physicsBody?.categoryBitMask = PhysicsCategory.Meteor
+        
+        //contactTestBitMask indicated what categories of objecxts this object should notify when they intersect
+        smallMeteor.physicsBody?.contactTestBitMask = PhysicsCategory.Laser
+        
+        //collisionBitMask indicates what categories of objects this object that the physics engine responds to
+        smallMeteor.physicsBody?.collisionBitMask = PhysicsCategory.None
         
         //calculate where on the screen the meteor will spawn
         let actualX = random(min: smallMeteor.size.width/2, max: size.width - smallMeteor.size.width/2)
@@ -104,6 +131,21 @@ class GameScene: SKScene
     {
         //set the sprite to be the largeMeteor png
         let mediumMeteor = SKSpriteNode(imageNamed: "largeMeteor")
+        
+        //creates physics body for sprite
+        mediumMeteor.physicsBody = SKPhysicsBody(rectangleOf: mediumMeteor.size)
+        
+        //sets sprite to be dynamic
+        mediumMeteor.physicsBody?.isDynamic = true
+        
+        //sets category bit mask to be meteorCategory
+        mediumMeteor.physicsBody?.categoryBitMask = PhysicsCategory.Meteor
+        
+        //contactTestBitMask indicated what categories of objecxts this object should notify when they intersect
+        mediumMeteor.physicsBody?.contactTestBitMask = PhysicsCategory.Laser
+        
+        //collisionBitMask indicates what categories of objects this object that the physics engine responds to
+        mediumMeteor.physicsBody?.collisionBitMask = PhysicsCategory.None
         
         //calculate where on the screen the meteor will spawn
         let actualX2 = random(min: mediumMeteor.size.width/2, max: size.width - mediumMeteor.size.width/2)
@@ -152,6 +194,13 @@ class GameScene: SKScene
         let laser = SKSpriteNode(imageNamed: "laser")
         laser.position = player.position
         
+        laser.physicsBody = SKPhysicsBody(circleOfRadius: laser.size.width/2)
+        laser.physicsBody?.isDynamic = true
+        laser.physicsBody?.categoryBitMask = PhysicsCategory.Laser
+        laser.physicsBody?.contactTestBitMask = PhysicsCategory.Meteor
+        laser.physicsBody?.collisionBitMask = PhysicsCategory.None
+        laser.physicsBody?.usesPreciseCollisionDetection = true
+        
         //calculates the vector from the player to the position that was touched
         let offset = touchLocation - laser.position
         
@@ -187,5 +236,36 @@ class GameScene: SKScene
         let laserdirection = SKAction.rotate(toAngle: angle, duration: 0.1, shortestUnitArc: true)
         
         laser.run(laserdirection) //action
+    }
+    
+    func laserDidHitMeteor(laser: SKSpriteNode, meteor: SKSpriteNode)
+    {
+        print("hit")
+        laser.removeFromParent()
+        meteor.removeFromParent()
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        
+        // passes two bodies that collide, does not guarantee that they are passed in any particular order
+        var firstBody: SKPhysicsBody
+        var secondBody: SKPhysicsBody
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        } else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        // Checks if the two objects that collide are the laser and a meteor
+        if ((firstBody.categoryBitMask & PhysicsCategory.Meteor != 0) &&
+            (secondBody.categoryBitMask & PhysicsCategory.Laser != 0)) {
+            if let meteor = firstBody.node as? SKSpriteNode, let
+                laser = secondBody.node as? SKSpriteNode {
+                laserDidHitMeteor(laser: laser, meteor: meteor)
+            }
+        }
+        
     }
 }
