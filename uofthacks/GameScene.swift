@@ -253,7 +253,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         //actions
         let actionMove = SKAction.move(to: realDest, duration: 2.5)
         let actionMoveDone = SKAction.removeFromParent()
-        laser.run(SKAction.sequence([actionMove, actionMoveDone]))
+        if GlobalAudio.blow == true{
+            laser.run(SKAction.sequence([actionMove, actionMoveDone]))
+        }
         
         //rotating laser
         let location = touch.location(in: self)
