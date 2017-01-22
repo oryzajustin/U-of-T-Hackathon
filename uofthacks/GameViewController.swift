@@ -81,7 +81,6 @@ class GameViewController: UIViewController, AVAudioRecorderDelegate
         print("File Path : \(audioFilename)");
         
         // make a dictionary to hold the recording settings so we can instantiate our AVAudioRecorder
-        
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 12000.0,
@@ -99,7 +98,7 @@ class GameViewController: UIViewController, AVAudioRecorderDelegate
                 audioRecorder.prepareToRecord();
                 audioRecorder.isMeteringEnabled = true;
             }
-            audioRecorder!.record(forDuration: TimeInterval(5.0));
+            audioRecorder!.record()
         } catch {
             print("Error")
         }
@@ -116,6 +115,7 @@ class GameViewController: UIViewController, AVAudioRecorderDelegate
     
     //This selector/function is called every time our timer (levelTime) fires
     func levelTimerCallback() {
+        GlobalAudio.blow = false
         //we have to update meters before we can get the metering values
         if audioRecorder != nil
         {
@@ -124,25 +124,23 @@ class GameViewController: UIViewController, AVAudioRecorderDelegate
             let ALPHA : Double = 0.05;
             let peakPowerForChannel : Double = pow(Double(10.0), (0.05) * Double(audioRecorder!.peakPower(forChannel: 0)));
             lowPassResults = ALPHA * peakPowerForChannel + Double((1.0) - ALPHA) * lowPassResults;
-            print("low pass res = \(lowPassResults)");
+//            print("low pass res = \(lowPassResults)");
             if (lowPassResults > 0.7 ){
                 print("Mic blow detected");
                 GlobalAudio.blow = true
+                self.levelTimer.invalidate()
             }
-            GlobalAudio.blow = false
         }
-        
-        
     }
-    //STOP RECORDING
-    @IBAction func btnStopPress(sender: AnyObject) {
-        
-        if audioRecorder != nil
-        {
-            audioRecorder!.stop()
-            self.levelTimer.invalidate()
-        }
-        
-    }
+//    //STOP RECORDING
+//    @IBAction func btnStopPress(sender: AnyObject) {
+//        
+//        if audioRecorder != nil
+//        {
+//            audioRecorder!.stop()
+//            self.levelTimer.invalidate()
+//        }
+//        
+//    }
 }
 
