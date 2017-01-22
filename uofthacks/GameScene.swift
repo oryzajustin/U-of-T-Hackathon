@@ -9,6 +9,11 @@ import SpriteKit
 import GameplayKit
 import SceneKit
 
+import Foundation
+import UIKit
+import AVFoundation
+import CoreAudio
+
 //functions to assist with vector calculations
 func + (left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
@@ -50,11 +55,15 @@ extension CGPoint {
     }
 }
 
+struct Globals{
+    static var score = 0
+}
+var scoreLabel = SKLabelNode()
+
 class GameScene: SKScene, SKPhysicsContactDelegate
 {
     //set the player's sprite to be the spaceship png ("player" in assets)
     let player = SKSpriteNode(imageNamed: "player")
-    
     
     override func didMove(to view: SKView)
     {
@@ -74,6 +83,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         //calling the method to actually create the meteors (spawning them forever)
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addSmallMeteor), SKAction.wait(forDuration: 2.0)])))
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addMediumMeteor), SKAction.wait(forDuration: 6.0)])))
+        
+        //add score label  
+        Globals.score = 0
+        scoreLabel = SKLabelNode(fontNamed: "Helvetica Neue")
+        scoreLabel.fontSize = 10
+        scoreLabel.fontColor = SKColor.white
+        scoreLabel.text = "score: \(Globals.score)"
+        scoreLabel.position = CGPoint(x: frame.size.width / 4, y: frame.size.height / 14)
+        addChild(scoreLabel)
     }
     
     //generating random numbers
@@ -118,12 +136,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         addChild(smallMeteor)
         
         //set varying speeds of the meteors
-        let actualDuration = random (min: CGFloat(3.0), max: CGFloat(5.0))
+        let actualDuration = random (min: CGFloat(5.0), max: CGFloat(7.0))
         
         //actions
         let actionMove = SKAction.move(to: CGPoint(x: actualX, y: -smallMeteor.size.width/2), duration: TimeInterval(actualDuration))
         let actionMoveDone = SKAction.removeFromParent()
-        smallMeteor.run(SKAction.sequence([actionMove, actionMoveDone]))
+        let loseAction = SKAction.run()
+        {
+            let gameOverScene = GameOverScene(size: self.size, won: false)
+            self.view?.presentScene(gameOverScene)
+        }
+        smallMeteor.run(SKAction.sequence([actionMove, loseAction, actionMoveDone]))
     }
     
     //function to create medium sized meteors
@@ -157,12 +180,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         addChild(mediumMeteor)
         
         //set the varying speeds of the meteors
-        let actualDuration2 = random (min: CGFloat(3.0), max: CGFloat(5.0))
+        let actualDuration2 = random (min: CGFloat(3.0), max: CGFloat(4.0))
 
         //actions
         let actionMove2 = SKAction.move(to: CGPoint(x: actualX2, y: -mediumMeteor.size.width/2), duration: TimeInterval(actualDuration2))
         let actionMoveDone2 = SKAction.removeFromParent()
-        mediumMeteor.run(SKAction.sequence([actionMove2, actionMoveDone2]))
+        let loseAction = SKAction.run()
+        {
+            let gameOverScene = GameOverScene(size: self.size, won: false)
+            self.view?.presentScene(gameOverScene)
+        }
+        mediumMeteor.run(SKAction.sequence([actionMove2, loseAction, actionMoveDone2]))
     }
     
     
@@ -223,7 +251,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate
         let realDest = shotDistance + laser.position
         
         //actions
-        let actionMove = SKAction.move(to: realDest, duration: 0.8)
+        let actionMove = SKAction.move(to: realDest, duration: 2.5)
         let actionMoveDone = SKAction.removeFromParent()
         laser.run(SKAction.sequence([actionMove, actionMoveDone]))
         
@@ -240,9 +268,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate
     
     func laserDidHitMeteor(laser: SKSpriteNode, meteor: SKSpriteNode)
     {
-        print("hit")
+        print("Hit")
         laser.removeFromParent()
         meteor.removeFromParent()
+        
+        //count score
+        Globals.score += 5
+        scoreLabel.text = "score: \(Globals.score)"
     }
     
     func didBegin(_ contact: SKPhysicsContact) {

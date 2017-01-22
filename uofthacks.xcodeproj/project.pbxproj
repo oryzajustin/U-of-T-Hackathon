@@ -17,6 +17,7 @@
 		468395F61E333E6F00AB19DE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 468395F41E333E6F00AB19DE /* LaunchScreen.storyboard */; };
 		468396011E333E6F00AB19DE /* uofthacksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 468396001E333E6F00AB19DE /* uofthacksTests.swift */; };
 		4683960C1E333E6F00AB19DE /* uofthacksUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4683960B1E333E6F00AB19DE /* uofthacksUITests.swift */; };
+		4683961C1E343B6900AB19DE /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4683961B1E343B6900AB19DE /* GameOverScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		468396071E333E6F00AB19DE /* uofthacksUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = uofthacksUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4683960B1E333E6F00AB19DE /* uofthacksUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = uofthacksUITests.swift; sourceTree = "<group>"; };
 		4683960D1E333E6F00AB19DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4683961B1E343B6900AB19DE /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GameOverScene.swift; path = ../GameOverScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 		468395E41E333E6F00AB19DE /* uofthacks */ = {
 			isa = PBXGroup;
 			children = (
+				4683961B1E343B6900AB19DE /* GameOverScene.swift */,
 				468395E51E333E6F00AB19DE /* AppDelegate.swift */,
 				468395E71E333E6F00AB19DE /* GameScene.sks */,
 				468395E91E333E6F00AB19DE /* Actions.sks */,
@@ -272,6 +275,7 @@
 			files = (
 				468395EC1E333E6F00AB19DE /* GameScene.swift in Sources */,
 				468395EE1E333E6F00AB19DE /* GameViewController.swift in Sources */,
+				4683961C1E343B6900AB19DE /* GameOverScene.swift in Sources */,
 				468395E61E333E6F00AB19DE /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -519,6 +523,7 @@
 				468396121E333E6F00AB19DE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		468396131E333E6F00AB19DE /* Build configuration list for PBXNativeTarget "uofthacksTests" */ = {
 			isa = XCConfigurationList;
@@ -527,6 +532,7 @@
 				468396151E333E6F00AB19DE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		468396161E333E6F00AB19DE /* Build configuration list for PBXNativeTarget "uofthacksUITests" */ = {
 			isa = XCConfigurationList;
@@ -535,6 +541,7 @@
 				468396181E333E6F00AB19DE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
