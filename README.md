@@ -20,3 +20,6 @@ microphone, and use their finger to aim the lasers.
 - [ ] Add sound effects
 - [ ] Add stars
 - [ ] Design logo
+
+#End of Hackathon notes:
+Everything worked the way we intended, except we struggled with making the player shoot based off of audio detection for microphone blowing. We got very close, though. We were able to have the microphone detect blowing, but the challenge was having the player's shooting action activate off of the audio detection. A home screen, sound effects, stars and a logo would be much simpler to implement, and we might add in these features in the future.
